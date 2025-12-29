@@ -88,26 +88,26 @@ export function Auth() {
         if (error) throw error;
         
         if (data.user) {
-          const { error: profileError } = await supabase.from("profiles").upsert({
-            id: data.user.id,
-            username: `${email.split("@")[0]}_${Math.floor(Math.random() * 1000)}`,
-            full_name: fullName.trim(),
-            phone: phoneNumber.trim() || null,
-            is_approved: true,
-            updated_at: new Date().toISOString(),
-          });
+            const { error: profileError } = await supabase.from("profiles").upsert({
+              id: data.user.id,
+              username: `${email.split("@")[0]}_${Math.floor(Math.random() * 1000)}`,
+              full_name: fullName.trim(),
+              phone: phoneNumber.trim() || null,
+              is_approved: false,
+              updated_at: new Date().toISOString(),
+            });
 
-          if (profileError) {
-            console.error("Profile creation error:", profileError);
-            toast.error("Account created but profile synchronization failed. Please contact admin.");
-            throw profileError;
+            if (profileError) {
+              console.error("Profile creation error:", profileError);
+              toast.error("Account created but profile synchronization failed. Please contact admin.");
+              throw profileError;
+            }
+
+            await confirmUserEmail(data.user.id);
+            toast.success("Identity established. Access request submitted.");
+            setShowPendingMessage(true);
           }
-
-          await confirmUserEmail(data.user.id);
-          toast.success("Identity established. Intelligence node active.");
-          setIsSignUp(false);
-        }
-      } else {
+        } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
