@@ -45,10 +45,25 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
     const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
     const [chatSearchQuery, setChatSearchQuery] = useState("");
     const notificationSound = useRef<HTMLAudioElement | null>(null);
+    const ringtoneSound = useRef<HTMLAudioElement | null>(null);
+    const [isSecurityGateOpen, setIsSecurityGateOpen] = useState(false);
+    const [gateTarget, setGateTarget] = useState<ActiveView | null>(null);
+    const [gatePassword, setGatePassword] = useState("");
 
     useEffect(() => {
       notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
+      ringtoneSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3");
+      ringtoneSound.current.loop = true;
     }, []);
+
+    useEffect(() => {
+      if (incomingCall && !activeCall) {
+        ringtoneSound.current?.play().catch(console.error);
+      } else {
+        ringtoneSound.current?.pause();
+        if (ringtoneSound.current) ringtoneSound.current.currentTime = 0;
+      }
+    }, [incomingCall, activeCall]);
 
       useEffect(() => {
         // Register Service Worker for mobile/background notifications
@@ -279,9 +294,31 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
     }
 
   const handleNavClick = (view: ActiveView) => {
+    if ((view === "chat" || view === "calls") && sessionStorage.getItem("gate_auth_040408") !== "true") {
+      setGateTarget(view);
+      setIsSecurityGateOpen(true);
+      return;
+    }
     setActiveView(view);
     if (view !== "chat") setSelectedContact(null);
     setSidebarOpen(false);
+  };
+
+  const handleGateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (gatePassword === "040408") {
+      sessionStorage.setItem("gate_auth_040408", "true");
+      setIsSecurityGateOpen(false);
+      setGatePassword("");
+      if (gateTarget) {
+        setActiveView(gateTarget);
+        setGateTarget(null);
+      }
+      toast.success("Security clearance granted");
+    } else {
+      toast.error("Invalid clearance code");
+      setGatePassword("");
+    }
   };
 
   const navItems = [
@@ -557,6 +594,40 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
           </main>
 
           <AnimatePresence>
+            {isSecurityGateOpen && (
+              <div className="fixed inset-0 z-[500] flex items-center justify-center p-8 bg-black/80 backdrop-blur-3xl">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="w-full max-w-sm space-y-8 text-center"
+                >
+                  <div className="flex justify-center">
+                    <div className="p-6 bg-white/[0.02] border border-white/10 rounded-[2rem]">
+                      <Shield className="w-10 h-10 text-indigo-500" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white">Security Gate</h3>
+                    <p className="text-zinc-500 text-[9px] uppercase tracking-[0.4em]">Section Encryption Active</p>
+                  </div>
+                  <form onSubmit={handleGateSubmit} className="space-y-4">
+                    <input
+                      type="password"
+                      value={gatePassword}
+                      onChange={(e) => setGatePassword(e.target.value)}
+                      placeholder="ENTER CLEARANCE"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-center text-white tracking-[0.5em] font-black outline-none focus:border-indigo-500/50 transition-all placeholder:tracking-[0.1em] placeholder:text-[9px]"
+                      autoFocus
+                    />
+                    <div className="flex gap-3">
+                      <Button type="button" variant="ghost" onClick={() => setIsSecurityGateOpen(false)} className="flex-1 rounded-xl text-[9px] uppercase font-black">Abort</Button>
+                      <Button type="submit" className="flex-1 bg-indigo-600 rounded-xl text-[9px] uppercase font-black">Authorize</Button>
+                    </div>
+                  </form>
+                </motion.div>
+              </div>
+            )}
             {activeCall && <VideoCall userId={session.user.id} contact={activeCall.contact} callType={activeCall.mode} isInitiator={activeCall.isInitiator} incomingSignal={activeCall.incomingSignal} onClose={() => setActiveCall(null)} />}
             {incomingCall && !activeCall && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">

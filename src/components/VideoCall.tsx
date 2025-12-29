@@ -145,19 +145,23 @@ export function VideoCall({
       try {
         setConnectionStatus("Requesting media access...");
         
-        const constraints = {
-          video: initialCallType === "video" ? {
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
-            facingMode: "user",
-            frameRate: { ideal: 30 }
-          } : false,
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          }
-        };
+          const constraints = {
+            video: initialCallType === "video" ? {
+              width: { min: 640, ideal: 1920, max: 1920 },
+              height: { min: 480, ideal: 1080, max: 1080 },
+              aspectRatio: 1.777777778,
+              facingMode: "user",
+              frameRate: { min: 15, ideal: 30, max: 60 }
+            } : false,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 48000,
+              sampleSize: 16
+            }
+          };
+
 
         const localStream = await navigator.mediaDevices.getUserMedia(constraints);
         
