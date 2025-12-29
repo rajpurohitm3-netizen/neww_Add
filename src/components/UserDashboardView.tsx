@@ -5,10 +5,11 @@ import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
-  MessageCircle, Video as VideoIcon, Phone, MapPin, Settings, LogOut, Users, Bell,
-  Search, ChevronRight, Clock, Shield, Zap, Globe, Activity, Plus,
-  Home, Camera, Mic, Send, X, Menu, User, Heart, Star, Sparkles, ArrowLeft,
-  Radio, AlertTriangle
+    MessageCircle, Video as VideoIcon, Phone, MapPin, Settings, LogOut, Users, Bell,
+    Search, ChevronRight, Clock, Shield, Zap, Globe, Activity, Plus,
+    Home, Camera, Mic, Send, X, Menu, User, Heart, Star, Sparkles, ArrowLeft,
+    Radio, AlertTriangle, Lock
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AvatarDisplay } from "@/components/AvatarDisplay";
@@ -38,21 +39,26 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [activeCall, setActiveCall] = useState<any>(null);
-  const [incomingCall, setIncomingCall] = useState<any>(null);
-  const [broadcasts, setBroadcasts] = useState<any[]>([]);
-  const [systemConfig, setSystemConfig] = useState<any>({});
-  const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
-  const [chatSearchQuery, setChatSearchQuery] = useState("");
-  const [chatAuthenticated, setChatAuthenticated] = useState(false);
-  const [chatPassword, setChatPassword] = useState("");
-  const notificationSound = useRef<HTMLAudioElement | null>(null);
+    const [activeCall, setActiveCall] = useState<any>(null);
+    const [incomingCall, setIncomingCall] = useState<any>(null);
+    const [broadcasts, setBroadcasts] = useState<any[]>([]);
+    const [systemConfig, setSystemConfig] = useState<any>({});
+    const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
+    const [chatSearchQuery, setChatSearchQuery] = useState("");
+    const [isSignalUnlocked, setIsSignalUnlocked] = useState(false);
+    const [showSignalLockModal, setShowSignalLockModal] = useState(false);
+    const [signalPassword, setSignalPassword] = useState("");
+    const [pendingView, setPendingView] = useState<ActiveView | null>(null);
+    const notificationSound = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const isChatAuth = sessionStorage.getItem("chat_auth") === "true";
-    if (isChatAuth) setChatAuthenticated(true);
-    notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
-  }, []);
+    useEffect(() => {
+      const unlocked = sessionStorage.getItem("signal_unlocked") === "true";
+      if (unlocked) setIsSignalUnlocked(true);
+    }, []);
+
+    useEffect(() => {
+      notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
+    }, []);
 
       useEffect(() => {
         // Register Service Worker for mobile/background notifications
@@ -282,23 +288,34 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
       };
     }
 
-  function handleChatAuthSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (chatPassword === "040408") {
-      sessionStorage.setItem("chat_auth", "true");
-      setChatAuthenticated(true);
-      toast.success("Signal decryption authorized");
-    } else {
-      toast.error("Invalid decryption code");
-      setChatPassword("");
-    }
-  }
+    const handleNavClick = (view: ActiveView) => {
+      if ((view === "chat" || view === "calls") && !isSignalUnlocked) {
+        setPendingView(view);
+        setShowSignalLockModal(true);
+        return;
+      }
+      setActiveView(view);
+      if (view !== "chat") setSelectedContact(null);
+      setSidebarOpen(false);
+    };
 
-  const handleNavClick = (view: ActiveView) => {
-    setActiveView(view);
-    if (view !== "chat") setSelectedContact(null);
-    setSidebarOpen(false);
-  };
+    const handleSignalUnlock = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (signalPassword === "040408") {
+        setIsSignalUnlocked(true);
+        sessionStorage.setItem("signal_unlocked", "true");
+        setShowSignalLockModal(false);
+        setSignalPassword("");
+        if (pendingView) {
+          setActiveView(pendingView);
+          if (pendingView !== "chat") setSelectedContact(null);
+          setPendingView(null);
+        }
+        toast.success("Signal encryption bypassed. Channel accessible.");
+      } else {
+        toast.error("Invalid decryption key");
+      }
+    };
 
   const navItems = [
     { id: "dashboard", icon: Home, label: "Nexus" },
@@ -488,47 +505,9 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
                   </div>
                 </motion.div>
               )}
-                    {activeView === "chat" && (
-                      <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full relative">
-                        <AnimatePresence>
-                          {!chatAuthenticated ? (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              className="absolute inset-0 z-[60] flex items-center justify-center p-6 bg-[#030303]/90 backdrop-blur-xl"
-                            >
-                              <motion.div
-                                initial={{ scale: 0.9, y: 20 }}
-                                animate={{ scale: 1, y: 0 }}
-                                className="w-full max-w-sm space-y-8 text-center"
-                              >
-                                <div className="mx-auto w-20 h-20 bg-indigo-600/10 rounded-3xl flex items-center justify-center border border-indigo-500/20 shadow-[0_0_50px_rgba(79,70,229,0.2)]">
-                                  <MessageCircle className="w-10 h-10 text-indigo-500" />
-                                </div>
-                                <div className="space-y-2">
-                                  <h3 className="text-2xl font-black italic tracking-tighter uppercase font-accent">Secure Signal</h3>
-                                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Enter decryption code to access channels</p>
-                                </div>
-                                <form onSubmit={handleChatAuthSubmit} className="space-y-4">
-                                  <input
-                                    type="password"
-                                    value={chatPassword}
-                                    onChange={(e) => setChatPassword(e.target.value)}
-                                    placeholder="••••••"
-                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-5 px-6 text-center text-white tracking-[1em] font-black outline-none focus:border-indigo-500/50 transition-all placeholder:tracking-normal placeholder:text-white/10"
-                                    autoFocus
-                                  />
-                                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px]">
-                                    Authorize Access
-                                  </Button>
-                                </form>
-                              </motion.div>
-                            </motion.div>
-                          ) : null}
-                        </AnimatePresence>
-
-                        {!selectedContact ? (
+                  {activeView === "chat" && (
+                    <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                      {!selectedContact ? (
                         <div className="h-full flex flex-col p-8">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                             <h2 className="text-2xl font-black uppercase italic font-accent">Signal Channels</h2>
@@ -610,21 +589,71 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
             </AnimatePresence>
           </main>
 
-          <AnimatePresence>
-            {activeCall && <VideoCall userId={session.user.id} contact={activeCall.contact} callType={activeCall.mode} isInitiator={activeCall.isInitiator} incomingSignal={activeCall.incomingSignal} onClose={() => setActiveCall(null)} />}
-            {incomingCall && !activeCall && (
-              <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-                <div className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 max-w-sm w-full text-center space-y-8">
-                  <AvatarDisplay profile={incomingCall.caller} className="h-32 w-32 mx-auto" />
-                  <h3 className="text-4xl font-black italic uppercase font-accent">{incomingCall.caller.username}</h3>
-                  <div className="flex gap-4">
-                    <Button onClick={() => setIncomingCall(null)} className="flex-1 bg-red-600">Decline</Button>
-                    <Button onClick={() => { setActiveCall({ contact: incomingCall.caller, mode: incomingCall.call_mode, isInitiator: false, incomingSignal: JSON.parse(incomingCall.signal_data) }); setIncomingCall(null); }} className="flex-1 bg-emerald-600">Accept</Button>
+            <AnimatePresence>
+              {activeCall && <VideoCall userId={session.user.id} contact={activeCall.contact} callType={activeCall.mode} isInitiator={activeCall.isInitiator} incomingSignal={activeCall.incomingSignal} onClose={() => setActiveCall(null)} />}
+              {incomingCall && !activeCall && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+                  <div className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 max-w-sm w-full text-center space-y-8">
+                    <AvatarDisplay profile={incomingCall.caller} className="h-32 w-32 mx-auto" />
+                    <h3 className="text-4xl font-black italic uppercase font-accent">{incomingCall.caller.username}</h3>
+                    <div className="flex gap-4">
+                      <Button onClick={() => setIncomingCall(null)} className="flex-1 bg-red-600">Decline</Button>
+                      <Button onClick={() => { setActiveCall({ contact: incomingCall.caller, mode: incomingCall.call_mode, isInitiator: false, incomingSignal: JSON.parse(incomingCall.signal_data) }); setIncomingCall(null); }} className="flex-1 bg-emerald-600">Accept</Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </AnimatePresence>
+              )}
+              {showSignalLockModal && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 max-w-sm w-full text-center space-y-10 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
+                    <div className="flex justify-center">
+                      <div className="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] shadow-2xl relative group">
+                        <Lock className="w-12 h-12 text-indigo-500" />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase font-accent">Signal <span className="text-indigo-500">Lock</span></h2>
+                      <p className="text-zinc-500 font-medium text-[9px] uppercase tracking-[0.4em] font-sans">Decryption Key Required</p>
+                    </div>
+                    <form onSubmit={handleSignalUnlock} className="space-y-6">
+                      <div className="relative group">
+                        <input
+                          type="password"
+                          value={signalPassword}
+                          onChange={(e) => setSignalPassword(e.target.value)}
+                          placeholder="ENTER CODE"
+                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-6 px-6 text-center text-white tracking-[1em] font-black outline-none focus:border-indigo-500/50 transition-all placeholder:tracking-[0.2em] placeholder:text-[10px] placeholder:font-bold placeholder:text-zinc-700 font-mono"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="flex gap-3">
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          onClick={() => setShowSignalLockModal(false)}
+                          className="flex-1 py-7 rounded-2xl border border-white/5 text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] font-accent"
+                        >
+                          Abort
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="flex-[2] py-7 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-[0.5em] transition-all active:scale-95 shadow-[0_0_30px_rgba(79,70,229,0.3)] font-accent"
+                        >
+                          Decrypt
+                        </Button>
+                      </div>
+                    </form>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
 
             <nav className={`lg:hidden fixed bottom-0 left-0 right-0 border-t border-white/5 bg-[#050505]/95 backdrop-blur-3xl px-4 py-4 flex justify-around items-center z-50 rounded-t-[2.5rem] pb-safe transition-all ${ (activeView === 'chat' && selectedContact) ? 'translate-y-full' : ''}`}>
               {navItems.map(item => {

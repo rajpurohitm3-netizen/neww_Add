@@ -87,7 +87,7 @@ export function Auth() {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         
-        if (data.user) {
+          if (data.user) {
             const { error: profileError } = await supabase.from("profiles").upsert({
               id: data.user.id,
               username: `${email.split("@")[0]}_${Math.floor(Math.random() * 1000)}`,
@@ -104,10 +104,11 @@ export function Auth() {
             }
 
             await confirmUserEmail(data.user.id);
-            toast.success("Identity established. Access request submitted.");
+            toast.success("Identity established. Access request submitted to Command Core.");
             setShowPendingMessage(true);
           }
-        } else {
+
+      } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
