@@ -38,22 +38,21 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-    const [activeCall, setActiveCall] = useState<any>(null);
-    const [incomingCall, setIncomingCall] = useState<any>(null);
-    const [broadcasts, setBroadcasts] = useState<any[]>([]);
-    const [systemConfig, setSystemConfig] = useState<any>({});
-    const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
-    const [chatSearchQuery, setChatSearchQuery] = useState("");
-    const notificationSound = useRef<HTMLAudioElement | null>(null);
-    const [signalUnlocked, setSignalUnlocked] = useState(false);
-    const [signalPassword, setSignalPassword] = useState("");
-    const [showSignalLock, setShowSignalLock] = useState(false);
+  const [activeCall, setActiveCall] = useState<any>(null);
+  const [incomingCall, setIncomingCall] = useState<any>(null);
+  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+  const [systemConfig, setSystemConfig] = useState<any>({});
+  const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
+  const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [chatAuthenticated, setChatAuthenticated] = useState(false);
+  const [chatPassword, setChatPassword] = useState("");
+  const notificationSound = useRef<HTMLAudioElement | null>(null);
 
-    useEffect(() => {
-      notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
-      const isSignalAuth = sessionStorage.getItem("signal_auth") === "true";
-      if (isSignalAuth) setSignalUnlocked(true);
-    }, []);
+  useEffect(() => {
+    const isChatAuth = sessionStorage.getItem("chat_auth") === "true";
+    if (isChatAuth) setChatAuthenticated(true);
+    notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
+  }, []);
 
       useEffect(() => {
         // Register Service Worker for mobile/background notifications
@@ -283,30 +282,23 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
       };
     }
 
-  const handleNavClick = (view: ActiveView) => {
-    if (view === "chat" && !signalUnlocked) {
-      setShowSignalLock(true);
-      return;
+  function handleChatAuthSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (chatPassword === "040408") {
+      sessionStorage.setItem("chat_auth", "true");
+      setChatAuthenticated(true);
+      toast.success("Signal decryption authorized");
+    } else {
+      toast.error("Invalid decryption code");
+      setChatPassword("");
     }
+  }
+
+  const handleNavClick = (view: ActiveView) => {
     setActiveView(view);
     if (view !== "chat") setSelectedContact(null);
     setSidebarOpen(false);
   };
-
-  function handleSignalUnlock(e: React.FormEvent) {
-    e.preventDefault();
-    if (signalPassword === "040408") {
-      sessionStorage.setItem("signal_auth", "true");
-      setSignalUnlocked(true);
-      setShowSignalLock(false);
-      setSignalPassword("");
-      setActiveView("chat");
-      toast.success("Signal channel unlocked");
-    } else {
-      toast.error("Invalid Signal Access Code");
-      setSignalPassword("");
-    }
-  }
 
   const navItems = [
     { id: "dashboard", icon: Home, label: "Nexus" },
@@ -496,9 +488,47 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
                   </div>
                 </motion.div>
               )}
-                  {activeView === "chat" && (
-                    <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                      {!selectedContact ? (
+                    {activeView === "chat" && (
+                      <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full relative">
+                        <AnimatePresence>
+                          {!chatAuthenticated ? (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 z-[60] flex items-center justify-center p-6 bg-[#030303]/90 backdrop-blur-xl"
+                            >
+                              <motion.div
+                                initial={{ scale: 0.9, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                className="w-full max-w-sm space-y-8 text-center"
+                              >
+                                <div className="mx-auto w-20 h-20 bg-indigo-600/10 rounded-3xl flex items-center justify-center border border-indigo-500/20 shadow-[0_0_50px_rgba(79,70,229,0.2)]">
+                                  <MessageCircle className="w-10 h-10 text-indigo-500" />
+                                </div>
+                                <div className="space-y-2">
+                                  <h3 className="text-2xl font-black italic tracking-tighter uppercase font-accent">Secure Signal</h3>
+                                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Enter decryption code to access channels</p>
+                                </div>
+                                <form onSubmit={handleChatAuthSubmit} className="space-y-4">
+                                  <input
+                                    type="password"
+                                    value={chatPassword}
+                                    onChange={(e) => setChatPassword(e.target.value)}
+                                    placeholder="••••••"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-5 px-6 text-center text-white tracking-[1em] font-black outline-none focus:border-indigo-500/50 transition-all placeholder:tracking-normal placeholder:text-white/10"
+                                    autoFocus
+                                  />
+                                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 py-6 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px]">
+                                    Authorize Access
+                                  </Button>
+                                </form>
+                              </motion.div>
+                            </motion.div>
+                          ) : null}
+                        </AnimatePresence>
+
+                        {!selectedContact ? (
                         <div className="h-full flex flex-col p-8">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                             <h2 className="text-2xl font-black uppercase italic font-accent">Signal Channels</h2>
@@ -591,41 +621,10 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
                     <Button onClick={() => setIncomingCall(null)} className="flex-1 bg-red-600">Decline</Button>
                     <Button onClick={() => { setActiveCall({ contact: incomingCall.caller, mode: incomingCall.call_mode, isInitiator: false, incomingSignal: JSON.parse(incomingCall.signal_data) }); setIncomingCall(null); }} className="flex-1 bg-emerald-600">Accept</Button>
                   </div>
-                  </div>
                 </div>
-              )}
-              {showSignalLock && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 max-w-sm w-full text-center space-y-8"
-                  >
-                    <div className="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-[2.5rem] inline-block">
-                      <MessageCircle className="w-12 h-12 text-indigo-500" />
-                    </div>
-                    <div className="space-y-4">
-                      <h3 className="text-3xl font-black italic uppercase">Signal <span className="text-indigo-500">Lock</span></h3>
-                      <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/30">Enter access code to unlock signals</p>
-                    </div>
-                    <form onSubmit={handleSignalUnlock} className="space-y-6">
-                      <input
-                        type="password"
-                        value={signalPassword}
-                        onChange={(e) => setSignalPassword(e.target.value)}
-                        placeholder="ACCESS CODE"
-                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-5 px-6 text-center text-white tracking-[0.5em] font-black outline-none focus:border-indigo-500/50 transition-all placeholder:tracking-[0.2em] placeholder:text-[10px] placeholder:font-bold placeholder:text-zinc-700"
-                        autoFocus
-                      />
-                      <div className="flex gap-3">
-                        <Button type="button" onClick={() => { setShowSignalLock(false); setSignalPassword(""); }} variant="ghost" className="flex-1 bg-white/5 border border-white/10">Cancel</Button>
-                        <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500">Unlock</Button>
-                      </div>
-                    </form>
-                  </motion.div>
-                </div>
-              )}
-            </AnimatePresence>
+              </div>
+            )}
+          </AnimatePresence>
 
             <nav className={`lg:hidden fixed bottom-0 left-0 right-0 border-t border-white/5 bg-[#050505]/95 backdrop-blur-3xl px-4 py-4 flex justify-around items-center z-50 rounded-t-[2.5rem] pb-safe transition-all ${ (activeView === 'chat' && selectedContact) ? 'translate-y-full' : ''}`}>
               {navItems.map(item => {
