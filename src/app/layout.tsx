@@ -18,25 +18,16 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Chatify",
+  title: "NexusApp",
   description: "Secure Personal Communication",
   manifest: "/manifest.json",
+  themeColor: "#4f46e5",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Chatify",
+    title: "NexusApp",
   },
-  formatDetection: {
-    telephone: false,
-  },
-};
-
-export const viewport = {
-  themeColor: "#010101",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
