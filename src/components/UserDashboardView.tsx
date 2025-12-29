@@ -45,9 +45,14 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
     const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
     const [chatSearchQuery, setChatSearchQuery] = useState("");
     const notificationSound = useRef<HTMLAudioElement | null>(null);
+    const [signalUnlocked, setSignalUnlocked] = useState(false);
+    const [signalPassword, setSignalPassword] = useState("");
+    const [showSignalLock, setShowSignalLock] = useState(false);
 
     useEffect(() => {
       notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
+      const isSignalAuth = sessionStorage.getItem("signal_auth") === "true";
+      if (isSignalAuth) setSignalUnlocked(true);
     }, []);
 
       useEffect(() => {
@@ -279,10 +284,29 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
     }
 
   const handleNavClick = (view: ActiveView) => {
+    if (view === "chat" && !signalUnlocked) {
+      setShowSignalLock(true);
+      return;
+    }
     setActiveView(view);
     if (view !== "chat") setSelectedContact(null);
     setSidebarOpen(false);
   };
+
+  function handleSignalUnlock(e: React.FormEvent) {
+    e.preventDefault();
+    if (signalPassword === "040408") {
+      sessionStorage.setItem("signal_auth", "true");
+      setSignalUnlocked(true);
+      setShowSignalLock(false);
+      setSignalPassword("");
+      setActiveView("chat");
+      toast.success("Signal channel unlocked");
+    } else {
+      toast.error("Invalid Signal Access Code");
+      setSignalPassword("");
+    }
+  }
 
   const navItems = [
     { id: "dashboard", icon: Home, label: "Nexus" },

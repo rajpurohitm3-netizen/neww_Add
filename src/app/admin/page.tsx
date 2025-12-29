@@ -223,65 +223,6 @@ export default function AdminPage() {
       setIsLoggingIn(false);
     }
   }
-  }
-
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    setAuthError(null);
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: email.split('@')[0],
-          is_admin: true
-        }
-      }
-    });
-
-    if (error) {
-      setAuthError(error.message);
-      setIsLoggingIn(false);
-    } else if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        username: email.split('@')[0],
-        is_admin: true,
-        is_approved: true,
-        updated_at: new Date().toISOString(),
-      });
-      toast.success("Identity established. Intelligence node active.");
-      setIsSignUp(false);
-      setIsLoggingIn(false);
-    }
-  }
-
-  async function handleQuickAccess() {
-    const adminEmail = 'admin@orchids.dev';
-    const adminPassword = 'Admin#Secure$99Node!2024';
-    
-    setEmail(adminEmail);
-    setPassword(adminPassword);
-    setIsLoggingIn(true);
-    setAuthError(null);
-    setAcceptedTerms(true);
-
-    toast.info("Applying system override credentials...");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password: adminPassword,
-    });
-
-    if (error) {
-      setAuthError(error.message === "Invalid login credentials" ? "Access Denied: Invalid Authorization ID or Encryption Key." : error.message);
-      setIsLoggingIn(false);
-    } else {
-      toast.success("Security bypass successful. Access granted.");
-    }
-  }
 
   if (loading) {
     return (
