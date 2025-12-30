@@ -134,7 +134,7 @@ export default function Home() {
             <Shield className="w-10 h-10 text-indigo-500 animate-pulse" />
         </div>
         <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-48 text-center">
-            <p className="text-[10px] font-medium uppercase tracking-[0.5em] text-indigo-500/50">Booting Nexus OS</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.5em] text-indigo-500/50">Initializing...</p>
         </div>
       </div>
     </div>
@@ -237,20 +237,20 @@ export default function Home() {
                     transition={{ delay: 0.3 }}
                     className="text-3xl lg:text-5xl font-black italic tracking-tighter uppercase text-white leading-[0.9] filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
                   >
-                    NEXUS <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600">PROTOCOL</span>
+                    CHAT <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600">IFY</span>
                   </motion.h2>
                   <p className="text-xs text-zinc-400 font-medium max-w-sm leading-relaxed tracking-wide border-l border-indigo-600 pl-3">
-                    distributed neural communications. <br />
-                    quantum-safe encryption matrix.
+                    Secure and private communication. <br />
+                    End-to-end encrypted messaging.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
                     {[
-                      { icon: MessageSquare, label: "Signals", desc: "E2EE", color: "text-indigo-400" },
-                      { icon: VideoIcon, label: "Uplink", desc: "Neural", color: "text-purple-400" },
-                      { icon: Fingerprint, label: "Vault", desc: "Vault", color: "text-orange-400" }
+                      { icon: MessageSquare, label: "Messages", desc: "E2EE", color: "text-indigo-400" },
+                      { icon: VideoIcon, label: "Calls", desc: "Private", color: "text-purple-400" },
+                      { icon: Fingerprint, label: "Secure", desc: "Vault", color: "text-orange-400" }
                     ].map((feature, i) => (
                     <motion.div 
                       key={i} 
@@ -298,42 +298,18 @@ export default function Home() {
                             </div>
                         ))}
                     </div>
-                    <p className="text-[7px] font-medium uppercase tracking-[0.2em] text-white/30">12k+ nodes synced</p>
                   </div>
                 </div>
-                
-                <motion.div 
-                    animate={{ y: [0, -15, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-8 -right-8 p-6 bg-indigo-600 rounded-[2.5rem] shadow-2xl border border-indigo-400/30 z-20 hidden xl:block"
-                >
-                    <Zap className="w-8 h-8 text-white" />
-                </motion.div>
-                
-                <motion.div 
-                    animate={{ y: [0, 15, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute -bottom-8 -left-8 p-6 bg-purple-600 rounded-[2.5rem] shadow-2xl border border-purple-400/30 z-20 hidden xl:block"
-                >
-                    <Globe className="w-8 h-8 text-white" />
-                </motion.div>
               </motion.div>
             </div>
 
             <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-12 opacity-30 hover:opacity-100 transition-all duration-1000">
                <div className="flex items-center gap-4 group">
-                 <Globe className="w-5 h-5 text-indigo-400 group-hover:rotate-180 transition-transform duration-1000" />
-                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">GLOBAL MATRIX ACTIVE</p>
+                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">SECURE COMMUNICATION</p>
                </div>
                <div className="w-px h-8 bg-white/10" />
                <div className="flex items-center gap-4 group">
-                 <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
-                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">UPLINK STABLE 100%</p>
-               </div>
-               <div className="w-px h-8 bg-white/10" />
-               <div className="flex items-center gap-4 group">
-                 <Cpu className="w-5 h-5 text-orange-400" />
-                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">CORE ENCRYPTED</p>
+                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED UPLINK</p>
                </div>
             </div>
           </motion.div>

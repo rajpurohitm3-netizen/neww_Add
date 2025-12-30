@@ -194,95 +194,6 @@ export default function AdminPage() {
     }
   }
 
-  async function handleQuickAccess() {
-    const adminEmail = 'admin@orchids.dev';
-    const adminPassword = 'Admin#Secure$99Node!2024';
-    
-    setEmail(adminEmail);
-    setPassword(adminPassword);
-    setIsLoggingIn(true);
-    setAuthError(null);
-    setAcceptedTerms(true);
-
-    toast.info("Applying system override credentials...");
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password: adminPassword,
-      });
-
-      if (error) {
-        setAuthError(error.message === "Invalid login credentials" ? "Access Denied: Invalid Authorization ID or Encryption Key." : error.message);
-      } else {
-        toast.success("Security bypass successful. Access granted.");
-      }
-    } catch (err: any) {
-      setAuthError(err.message || "Quick access protocol failed.");
-    } finally {
-      setIsLoggingIn(false);
-    }
-  }
-  }
-
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoggingIn(true);
-    setAuthError(null);
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: email.split('@')[0],
-          is_admin: true
-        }
-      }
-    });
-
-    if (error) {
-      setAuthError(error.message);
-      setIsLoggingIn(false);
-    } else if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        username: email.split('@')[0],
-        is_admin: true,
-        is_approved: true,
-        updated_at: new Date().toISOString(),
-      });
-      toast.success("Identity established. Intelligence node active.");
-      setIsSignUp(false);
-      setIsLoggingIn(false);
-    }
-  }
-
-  async function handleQuickAccess() {
-    const adminEmail = 'admin@orchids.dev';
-    const adminPassword = 'Admin#Secure$99Node!2024';
-    
-    setEmail(adminEmail);
-    setPassword(adminPassword);
-    setIsLoggingIn(true);
-    setAuthError(null);
-    setAcceptedTerms(true);
-
-    toast.info("Applying system override credentials...");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password: adminPassword,
-    });
-
-    if (error) {
-      setAuthError(error.message === "Invalid login credentials" ? "Access Denied: Invalid Authorization ID or Encryption Key." : error.message);
-      setIsLoggingIn(false);
-    } else {
-      toast.success("Security bypass successful. Access granted.");
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#050505] flex-col gap-16 relative overflow-hidden">
@@ -370,44 +281,44 @@ export default function AdminPage() {
           <div className="bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-8 md:p-16 shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-16 h-16 md:w-20 md:h-20 border-t-2 border-l-2 border-indigo-500/30 rounded-tl-[2.5rem] md:rounded-tl-[4rem] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-16 h-16 md:w-20 md:h-20 border-b-2 border-r-2 border-indigo-500/30 rounded-br-[2.5rem] md:rounded-br-[4rem] pointer-events-none" />
-            <div className="absolute inset-0 bg-indigo-500/[0.02] pointer-events-none" />
-            
-            <div className="text-center space-y-4 md:space-y-6 relative z-10">
-              {systemConfig.firewall_status === 'true' && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-500/10 border border-red-500/20 rounded-2xl py-2 md:py-3 px-4 md:px-6 mb-4 md:mb-6 flex items-center justify-center gap-3"
-                >
-                  <ShieldAlert className="w-4 h-4 text-red-500 animate-pulse" />
-                  <p className="text-[9px] md:text-[10px] font-black text-red-500 tracking-[0.2em]">
-                    Global Firewall Active
-                  </p>
-                </motion.div>
-              )}
-              <motion.div 
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
-                className="mx-auto w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl md:rounded-[2rem] flex items-center justify-center mb-6 md:mb-8 border border-white/20 shadow-[0_0_50px_rgba(79,70,229,0.4)] relative"
+          <div className="absolute inset-0 bg-indigo-500/[0.02] pointer-events-none" />
+          
+          <div className="text-center space-y-4 md:space-y-6 relative z-10">
+            {systemConfig.firewall_status === 'true' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-red-500/10 border border-red-500/20 rounded-2xl py-2 md:py-3 px-4 md:px-6 mb-4 md:mb-6 flex items-center justify-center gap-3"
               >
-                <Fingerprint className="w-8 h-8 md:w-12 md:h-12 text-white" />
-                <motion.div 
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 border-2 border-white/10 border-t-white/40 rounded-2xl md:rounded-[2rem]"
-                />
+                <ShieldAlert className="w-4 h-4 text-red-500 animate-pulse" />
+                <p className="text-[9px] md:text-[10px] font-black text-red-500 tracking-[0.2em]">
+                  Security Protocol Active
+                </p>
               </motion.div>
-              <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter text-white">
-                {isSignUp ? 'Register' : 'Admin'} <span className="text-indigo-500">Node</span>
-              </h1>
-              <div className="flex items-center justify-center gap-4">
-                 <div className="h-px w-6 md:w-8 bg-white/10" />
-                 <p className="text-[9px] md:text-[11px] font-bold tracking-widest text-white/30">
-                   {isSignUp ? 'Establish New Identity' : 'Protocol Authentication Required'}
-                 </p>
-                 <div className="h-px w-6 md:w-8 bg-white/10" />
-              </div>
+            )}
+            <motion.div 
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="mx-auto w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl md:rounded-[2rem] flex items-center justify-center mb-6 md:mb-8 border border-white/20 shadow-[0_0_50px_rgba(79,70,229,0.4)] relative"
+            >
+              <Fingerprint className="w-8 h-8 md:w-12 md:h-12 text-white" />
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 border-2 border-white/10 border-t-white/40 rounded-2xl md:rounded-[2rem]"
+              />
+            </motion.div>
+            <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter text-white">
+              {isSignUp ? 'Register' : 'Admin'} <span className="text-indigo-500">Access</span>
+            </h1>
+            <div className="flex items-center justify-center gap-4">
+               <div className="h-px w-6 md:w-8 bg-white/10" />
+               <p className="text-[9px] md:text-[11px] font-bold tracking-widest text-white/30">
+                 {isSignUp ? 'Request Account' : 'Authentication Required'}
+               </p>
+               <div className="h-px w-6 md:w-8 bg-white/10" />
             </div>
+          </div>
 
             <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-6 md:space-y-8 mt-8 md:mt-12 relative z-10">
               <motion.div 
@@ -516,7 +427,7 @@ export default function AdminPage() {
                       <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />
                     ) : (
                       <>
-                        {isSignUp ? 'Create Node' : 'Bypass Security'}
+                          {isSignUp ? 'Create Node' : 'Please Enter'}
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform" />
                       </>
                     )}
@@ -524,19 +435,11 @@ export default function AdminPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] transition-transform" />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleQuickAccess}
-                  className="w-full text-[9px] md:text-[10px] font-bold tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors py-2 md:py-3 border border-indigo-500/20 rounded-xl bg-indigo-500/5 hover:bg-indigo-500/10"
-                >
-                  Quick System Access
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="w-full text-[9px] md:text-[10px] font-bold tracking-widest text-white/20 hover:text-white transition-colors py-2"
-                >
+                  <button
+                    type="button"
+                    onClick={() => setIsSignUp(!isSignUp)}
+                    className="w-full text-[9px] md:text-[10px] font-bold tracking-widest text-white/20 hover:text-white transition-colors py-2"
+                  >
                   {isSignUp ? 'Back to Login' : 'Register New Node'}
                 </button>
               </div>

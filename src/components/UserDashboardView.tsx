@@ -285,11 +285,11 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
   };
 
   const navItems = [
-    { id: "dashboard", icon: Home, label: "Nexus" },
-    { id: "chat", icon: MessageCircle, label: "Signals", badge: unreadCount },
+    { id: "dashboard", icon: Home, label: "Home" },
+    { id: "chat", icon: MessageCircle, label: "Messages", badge: unreadCount },
     { id: "vault", icon: Shield, label: "Vault" },
-    { id: "calls", icon: Phone, label: "Uplink" },
-    { id: "settings", icon: Settings, label: "Entity" },
+    { id: "calls", icon: Phone, label: "Calls" },
+    { id: "settings", icon: Settings, label: "Settings" },
   ];
 
   if (!myProfile) {
@@ -297,7 +297,7 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
       <div className="flex h-[100dvh] items-center justify-center bg-[#030303]">
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Syncing Node</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Loading...</p>
         </div>
       </div>
     );
@@ -311,7 +311,7 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden" />
             <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-[#050505] border-r border-white/5 z-[101] lg:hidden p-6 flex flex-col">
               <div className="flex items-center justify-between mb-12">
-                <h2 className="text-xl font-black italic tracking-tighter uppercase font-accent">Orchids <span className="text-indigo-500">Core</span></h2>
+                <h2 className="text-xl font-black italic tracking-tighter uppercase font-accent">CHAT <span className="text-indigo-500">IFY</span></h2>
                 <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)} className="text-white/20 hover:text-white bg-white/5 rounded-xl"><X className="w-5 h-5" /></Button>
               </div>
               <div className="flex items-center gap-4 mb-12 p-4 bg-white/[0.02] border border-white/5 rounded-[2rem]">
@@ -409,85 +409,85 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
         </motion.aside>
 
         <div className="flex-1 flex flex-col min-w-0 bg-[#030303] relative overflow-hidden h-full">
-          <header className="lg:hidden h-20 border-b border-white/5 bg-[#050505]/80 backdrop-blur-3xl flex items-center justify-between px-6 z-30 shrink-0">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)} className="text-white/20"><Menu className="w-6 h-6" /></Button>
-              <h1 className="text-lg font-black italic tracking-tighter uppercase font-accent">Orchids <span className="text-indigo-500">Core</span></h1>
-            </div>
-            <AvatarDisplay profile={myProfile} className="h-10 w-10" />
-          </header>
+            <header className="lg:hidden h-20 border-b border-white/5 bg-[#050505]/80 backdrop-blur-3xl flex items-center justify-between px-6 z-30 shrink-0">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)} className="text-white/20"><Menu className="w-6 h-6" /></Button>
+                <h1 className="text-lg font-black italic tracking-tighter uppercase font-accent">CHAT <span className="text-indigo-500">IFY</span></h1>
+              </div>
+              <AvatarDisplay profile={myProfile} className="h-10 w-10" />
+            </header>
 
-          <main className="flex-1 min-h-0 overflow-hidden relative">
-            <AnimatePresence mode="wait">
-              {activeView === "dashboard" && (
-                <motion.div key="dashboard" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} className="h-full overflow-y-auto custom-scrollbar p-5 sm:p-8 md:p-12 space-y-8 md:space-y-12 pb-32 lg:pb-12">
-                  {broadcasts.length > 0 && (
-                    <div className="bg-indigo-600 rounded-[2rem] p-6 text-white">
-                      <div className="flex items-center gap-3 mb-4"><Radio className="w-4 h-4 animate-pulse" /><span className="text-[10px] font-black uppercase tracking-[0.4em]">Broadcast</span></div>
-                      <p className="text-xl font-black italic">"{broadcasts[0].content}"</p>
-                    </div>
-                  )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    {[
-                      { label: "Signals", value: unreadCount, icon: MessageCircle, color: "from-indigo-600 to-indigo-700" },
-                      { label: "Nodes", value: onlineUsers.size, icon: Users, color: "from-emerald-600 to-emerald-700" },
-                      { label: "Entities", value: profiles.length, icon: User, color: "from-purple-600 to-purple-700" },
-                      { label: "Security", value: "E2EE", icon: Shield, color: "from-orange-600 to-orange-700" }
-                    ].map((stat, i) => (
-                      <div key={i} className={`bg-gradient-to-br ${stat.color} p-6 rounded-[2rem] shadow-xl`}>
-                        <stat.icon className="w-6 h-6 text-white mb-4" />
-                        <p className="text-3xl font-black italic text-white">{stat.value}</p>
-                        <p className="text-[10px] font-black text-white/80 uppercase tracking-widest mt-2">{stat.label}</p>
+            <main className="flex-1 min-h-0 overflow-hidden relative">
+              <AnimatePresence mode="wait">
+                {activeView === "dashboard" && (
+                  <motion.div key="dashboard" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} className="h-full overflow-y-auto custom-scrollbar p-5 sm:p-8 md:p-12 space-y-8 md:space-y-12 pb-32 lg:pb-12">
+                    {broadcasts.length > 0 && (
+                      <div className="bg-indigo-600 rounded-[2rem] p-6 text-white">
+                        <div className="flex items-center gap-3 mb-4"><Radio className="w-4 h-4 animate-pulse" /><span className="text-[10px] font-black uppercase tracking-[0.4em]">Broadcast</span></div>
+                        <p className="text-xl font-black italic">"{broadcasts[0].content}"</p>
                       </div>
-                    ))}
-                  </div>
-                  <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
-                    <div className="flex items-center gap-4 mb-6"><Camera className="w-5 h-5 text-indigo-400" /><h3 className="text-sm font-black uppercase tracking-[0.3em] font-accent">Temporal Stories</h3></div>
-                    <Stories userId={session.user.id} />
-                  </div>
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6">
-                      <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 font-accent">Recent Channels</h3>
-                      <div className="space-y-2">
-                        {recentChats.map(chat => (
-                          <button key={chat.id} onClick={() => { setSelectedContact(chat); setActiveView("chat"); }} className="w-full flex items-center gap-4 p-4 hover:bg-white/5 rounded-2xl transition-all">
-                            <AvatarDisplay profile={chat} className="h-10 w-10" />
-                            <div className="flex-1 text-left"><p className="font-black text-sm uppercase italic font-accent">{chat.username}</p></div>
-                            <ChevronRight className="w-4 h-4 text-white/10" />
-                          </button>
-                        ))}
-                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                      {[
+                        { label: "Messages", value: unreadCount, icon: MessageCircle, color: "from-indigo-600 to-indigo-700" },
+                        { label: "Online", value: onlineUsers.size, icon: Users, color: "from-emerald-600 to-emerald-700" },
+                        { label: "Users", value: profiles.length, icon: User, color: "from-purple-600 to-purple-700" },
+                        { label: "Security", value: "E2EE", icon: Shield, color: "from-orange-600 to-orange-700" }
+                      ].map((stat, i) => (
+                        <div key={i} className={`bg-gradient-to-br ${stat.color} p-6 rounded-[2rem] shadow-xl`}>
+                          <stat.icon className="w-6 h-6 text-white mb-4" />
+                          <p className="text-3xl font-black italic text-white">{stat.value}</p>
+                          <p className="text-[10px] font-black text-white/80 uppercase tracking-widest mt-2">{stat.label}</p>
+                        </div>
+                      ))}
                     </div>
-                    <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6">
-                      <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 font-accent">Global Nodes</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {profiles.map(p => (
-                          <div key={p.id} onClick={() => { setSelectedContact(p); setActiveView("chat"); }} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center gap-3 cursor-pointer hover:border-indigo-500/30">
-                            <AvatarDisplay profile={p} className="h-10 w-10" />
-                            <p className="text-[10px] font-black uppercase font-accent">{p.username}</p>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-6">
+                      <div className="flex items-center gap-4 mb-6"><Camera className="w-5 h-5 text-indigo-400" /><h3 className="text-sm font-black uppercase tracking-[0.3em] font-accent">Stories</h3></div>
+                      <Stories userId={session.user.id} />
                     </div>
-                  </div>
-                </motion.div>
-              )}
-                  {activeView === "chat" && (
-                    <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                      {!selectedContact ? (
-                        <div className="h-full flex flex-col p-8">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                            <h2 className="text-2xl font-black uppercase italic font-accent">Signal Channels</h2>
-                            <div className="relative group w-full md:w-80">
-                              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
-                              <input 
-                                placeholder="Search channels..."
-                                value={chatSearchQuery}
-                                onChange={(e) => setChatSearchQuery(e.target.value)}
-                                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-sm outline-none focus:border-indigo-500/50 transition-all placeholder:text-white/10"
-                              />
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                      <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6">
+                        <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 font-accent">Recent Chats</h3>
+                        <div className="space-y-2">
+                          {recentChats.map(chat => (
+                            <button key={chat.id} onClick={() => { setSelectedContact(chat); setActiveView("chat"); }} className="w-full flex items-center gap-4 p-4 hover:bg-white/5 rounded-2xl transition-all">
+                              <AvatarDisplay profile={chat} className="h-10 w-10" />
+                              <div className="flex-1 text-left"><p className="font-black text-sm uppercase italic font-accent">{chat.username}</p></div>
+                              <ChevronRight className="w-4 h-4 text-white/10" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6">
+                        <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 font-accent">Global Directory</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {profiles.map(p => (
+                            <div key={p.id} onClick={() => { setSelectedContact(p); setActiveView("chat"); }} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center gap-3 cursor-pointer hover:border-indigo-500/30">
+                              <AvatarDisplay profile={p} className="h-10 w-10" />
+                              <p className="text-[10px] font-black uppercase font-accent">{p.username}</p>
                             </div>
-                          </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+                    {activeView === "chat" && (
+                      <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        {!selectedContact ? (
+                          <div className="h-full flex flex-col p-8">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                              <h2 className="text-2xl font-black uppercase italic font-accent">Conversations</h2>
+                              <div className="relative group w-full md:w-80">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                                <input 
+                                  placeholder="Search..."
+                                  value={chatSearchQuery}
+                                  onChange={(e) => setChatSearchQuery(e.target.value)}
+                                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-sm outline-none focus:border-indigo-500/50 transition-all placeholder:text-white/10"
+                                />
+                              </div>
+                            </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar pr-2 pb-24">
                             {profiles.filter(p => p.username.toLowerCase().includes(chatSearchQuery.toLowerCase())).length === 0 ? (
                               <div className="col-span-full py-20 text-center opacity-20">
