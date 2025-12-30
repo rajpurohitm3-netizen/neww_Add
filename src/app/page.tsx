@@ -5,10 +5,9 @@ import { supabase } from "@/lib/supabase";
 import { Auth } from "@/components/Auth";
 import { UserDashboardView } from "@/components/UserDashboardView";
 import { OTPVerification } from "@/components/OTPVerification";
-import { SecurityPin } from "@/components/SecurityPin";
-import { Lock, Shield, MessageSquare, Phone, Video as VideoIcon, Activity, Fingerprint } from "lucide-react";
+import { Lock, Shield, Zap, Globe, MessageSquare, Phone, MapPin, Video as VideoIcon, Terminal, Cpu, Radio, Activity, Sparkles, Fingerprint } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { generateKeyPair, exportPublicKey, exportPrivateKey, importPrivateKey, isCryptoSupported } from "@/lib/crypto";
+import { generateKeyPair, exportPublicKey, exportPrivateKey, importPrivateKey } from "@/lib/crypto";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -18,12 +17,8 @@ export default function Home() {
   const [privateKey, setPrivateKey] = useState<CryptoKey | null>(null);
   const [otpRequired, setOtpRequired] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-  const [appPinVerified, setAppPinVerified] = useState(false);
 
   useEffect(() => {
-    const isVerified = sessionStorage.getItem("app_pin_verified") === "true";
-    setAppPinVerified(isVerified);
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -79,10 +74,6 @@ export default function Home() {
   const [keyError, setKeyError] = useState(false);
 
   async function handleKeySetup() {
-    if (!isCryptoSupported()) {
-      toast.error("Encryption not supported in this environment.");
-      return;
-    }
     try {
       const storedPrivKey = localStorage.getItem(`priv_key_${session.user.id}`);
       if (storedPrivKey && storedPrivKey !== "undefined" && storedPrivKey !== "null") {
@@ -100,7 +91,7 @@ export default function Home() {
     } catch (error) {
       console.error("Key setup failed:", error);
       setKeyError(true);
-      toast.error("Encryption key setup failed.");
+      toast.error("Encryption key not found. Please refresh or regenerate.");
     }
   }
 
@@ -148,20 +139,6 @@ export default function Home() {
       </div>
     </div>
   );
-
-  if (!appPinVerified) {
-    return (
-      <SecurityPin 
-        correctCode="162008"
-        title="App Access"
-        description="Enter security code to initialize session"
-        onSuccess={() => {
-          sessionStorage.setItem("app_pin_verified", "true");
-          setAppPinVerified(true);
-        }}
-      />
-    );
-  }
 
   if (session && isApproved === false) {
     return (
@@ -245,7 +222,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Chatify <span className="text-indigo-400">v2</span></h1>
+                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Orchids <span className="text-indigo-400">v2</span></h1>
                     <div className="flex items-center gap-2 mt-1">
                         <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                         <span className="text-[8px] font-medium uppercase tracking-[0.4em] text-white/40">Secure Node</span>

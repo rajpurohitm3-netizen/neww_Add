@@ -13,28 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AvatarDisplay } from "./AvatarDisplay";
-import { 
-  importPublicKey, 
-  encryptMessage, 
-  decryptMessage,
-  generateAESKey,
-  encryptWithAES,
-  decryptWithAES,
-  encryptAESKeyForUser,
-  decryptAESKeyWithUserPrivateKey
-} from "@/lib/crypto";
 
 interface ChatProps {
   session: any;
   privateKey?: CryptoKey;
-  myProfile?: any;
   initialContact: any;
   isPartnerOnline?: boolean;
   onBack?: () => void;
   onInitiateCall: (contact: any, mode: "video" | "voice") => void;
 }
 
-export function Chat({ session, privateKey, myProfile, initialContact, isPartnerOnline, onBack, onInitiateCall }: ChatProps) {
+export function Chat({ session, privateKey, initialContact, isPartnerOnline, onBack, onInitiateCall }: ChatProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -50,43 +39,7 @@ export function Chat({ session, privateKey, myProfile, initialContact, isPartner
     const [showSaveToVault, setShowSaveToVault] = useState<any>(null);
     const [vaultPassword, setVaultPassword] = useState("");
     const [lastReadTimestamp, setLastReadTimestamp] = useState<string | null>(null);
-    const [decryptedMessages, setDecryptedMessages] = useState<Record<string, string>>({});
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      decryptBatch(messages);
-    }, [messages, privateKey]);
-
-    async function decryptBatch(msgs: any[]) {
-      if (!privateKey) return;
-      
-      const newDecrypted = { ...decryptedMessages };
-      let changed = false;
-
-      for (const msg of msgs) {
-        if (msg.encrypted_content.startsWith("v2:") && !newDecrypted[msg.id]) {
-          try {
-            const parts = msg.encrypted_content.split(":");
-            if (parts.length === 5) {
-              const [_, recEncKey, senderEncKey, iv, ciphertext] = parts;
-              const isMe = msg.sender_id === session.user.id;
-              const relevantEncKey = isMe ? senderEncKey : recEncKey;
-
-              const aesKey = await decryptAESKeyWithUserPrivateKey(relevantEncKey, privateKey);
-              const decrypted = await decryptWithAES(ciphertext, iv, aesKey);
-              newDecrypted[msg.id] = decrypted;
-              changed = true;
-            }
-          } catch (err) {
-            console.error("Decryption failed for msg", msg.id, err);
-            newDecrypted[msg.id] = "[Decryption Error]";
-            changed = true;
-          }
-        }
-      }
-
-      if (changed) setDecryptedMessages(newDecrypted);
-    }
 
     useEffect(() => {
       const handleBlur = () => setIsFocused(false);
@@ -336,30 +289,11 @@ export function Chat({ session, privateKey, myProfile, initialContact, isPartner
 
     async function sendMessage(mediaType: string = "text", mediaUrl: string | null = null) {
       if (!newMessage.trim() && !mediaUrl) return;
-
-      let finalContent = newMessage.trim() || " ";
-
-      // Apply E2EE if public key is available
-      if (initialContact.public_key && mediaType === "text" && privateKey) {
-        try {
-          const recipientPubKey = await importPublicKey(initialContact.public_key);
-          const myPubKey = await importPublicKey(myProfile?.public_key || "");
-          const aesKey = await generateAESKey();
-          const encrypted = await encryptWithAES(finalContent, aesKey);
-          
-          const recEncKey = await encryptAESKeyForUser(aesKey, recipientPubKey);
-          const senderEncKey = await encryptAESKeyForUser(aesKey, myPubKey);
-          
-          finalContent = `v2:${recEncKey}:${senderEncKey}:${encrypted.iv}:${encrypted.content}`;
-        } catch (err) {
-          console.error("Encryption failed:", err);
-        }
-      }
   
       const messageData = {
         sender_id: session.user.id,
         receiver_id: initialContact.id,
-        encrypted_content: finalContent, 
+        encrypted_content: newMessage.trim() || " ", 
         media_type: mediaType,
         media_url: mediaUrl,
         is_viewed: false,
@@ -612,15 +546,14 @@ export function Chat({ session, privateKey, myProfile, initialContact, isPartner
                         </div>
                       </div>
                     ) : (
-                          <div className={`group/msg relative p-5 rounded-[2rem] text-sm font-medium leading-relaxed ${
-                          isMe 
-                            ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/10" 
-                            : "bg-white/[0.03] border border-white/5 text-white/90"
-                        }`}>
-                          {decryptedMessages[msg.id] || msg.encrypted_content}
-                          <button 
-                            onClick={() => deleteMessage(msg.id)}
-
+                        <div className={`group/msg relative p-5 rounded-[2rem] text-sm font-medium leading-relaxed ${
+                        isMe 
+                          ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/10" 
+                          : "bg-white/[0.03] border border-white/5 text-white/90"
+                      }`}>
+                        {msg.encrypted_content}
+                        <button 
+                          onClick={() => deleteMessage(msg.id)}
                           className={`absolute ${isMe ? '-left-10' : '-right-10'} top-1/2 -translate-y-1/2 p-2 text-white/10 hover:text-red-500 opacity-0 group-hover/msg:opacity-100 transition-all`}
                         >
                           <Trash2 className="w-4 h-4" />
