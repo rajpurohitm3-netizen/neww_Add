@@ -187,6 +187,10 @@ export function generateSecureToken(length: number = 32): string {
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
+export function isCryptoSupported(): boolean {
+  return typeof window !== "undefined" && !!window.crypto && !!window.crypto.subtle;
+}
+
 export async function hashData(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);

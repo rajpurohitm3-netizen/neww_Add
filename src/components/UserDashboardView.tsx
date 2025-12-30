@@ -17,7 +17,6 @@ import { Stories } from "@/components/Stories";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { VideoCall } from "@/components/VideoCall";
 import { PrivateSafe } from "@/components/PrivateSafe";
-import { SecurityPin } from "@/components/SecurityPin";
 
 type ActiveView = "dashboard" | "chat" | "vault" | "calls" | "settings";
 
@@ -45,13 +44,7 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
     const [systemConfig, setSystemConfig] = useState<any>({});
     const [unviewedSnapshots, setUnviewedSnapshots] = useState<any[]>([]);
     const [chatSearchQuery, setChatSearchQuery] = useState("");
-    const [msgPinVerified, setMsgPinVerified] = useState(false);
     const notificationSound = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-      const isVerified = sessionStorage.getItem("msg_pin_verified") === "true";
-      setMsgPinVerified(isVerified);
-    }, []);
 
     useEffect(() => {
       notificationSound.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
@@ -479,21 +472,10 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
                     </div>
                   </motion.div>
                 )}
-                      {activeView === "chat" && (
-                        <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-                          {!msgPinVerified ? (
-                            <SecurityPin 
-                              correctCode="040408"
-                              title="Message Encryption"
-                              description="Decrypting intelligence packets..."
-                              onSuccess={() => {
-                                sessionStorage.setItem("msg_pin_verified", "true");
-                                setMsgPinVerified(true);
-                              }}
-                            />
-                          ) : !selectedContact ? (
-                            <div className="h-full flex flex-col p-8">
-
+                    {activeView === "chat" && (
+                      <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+                        {!selectedContact ? (
+                          <div className="h-full flex flex-col p-8">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                               <h2 className="text-2xl font-black uppercase italic font-accent">Conversations</h2>
                               <div className="relative group w-full md:w-80">
