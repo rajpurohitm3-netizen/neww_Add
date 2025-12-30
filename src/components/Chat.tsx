@@ -4,6 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
+    encryptWithAES, decryptWithAES, generateAESKey, 
+    encryptAESKeyForUser, decryptAESKeyWithUserPrivateKey,
+    importPublicKey, importPrivateKey
+} from "@/lib/crypto";
+import { 
     Send, Plus, Camera, Image as ImageIcon, MapPin, 
     Video, Mic, X, Download, Shield, AlertTriangle,
     Eye, EyeOff, Save, Trash2, ShieldCheck, Lock,
@@ -198,13 +203,21 @@ export function Chat({ session, privateKey, initialContact, isPartnerOnline, onB
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-    async function deleteMessage(id: string) {
-      const { error } = await supabase.from("messages").delete().eq("id", id);
-      if (error) {
-        toast.error("Failed to purge intelligence packet");
-      } else {
-        setMessages(prev => prev.filter(m => m.id !== id));
-        toast.success("Intelligence purged from node");
+    async function decryptMessageContent(msg: any) {
+      if (msg.decrypted_content) return msg;
+      if (!msg.encrypted_content || !msg.iv || !privateKey) return msg;
+
+      try {
+        const encryptedAESKey = msg.sender_id === session.user.id ? msg.sender_key : msg.receiver_key;
+        if (!encryptedAESKey) return msg;
+
+        const aesKey = await decryptAESKeyWithUserPrivateKey(encryptedAESKey, privateKey);
+        const decrypted = await decryptWithAES(msg.encrypted_content, msg.iv, aesKey);
+        
+        return { ...msg, decrypted_content: decrypted };
+      } catch (err) {
+        console.error("Decryption failed for message", msg.id, err);
+        return { ...msg, decrypted_content: "⚠️ [Decryption Error: Key mismatch or corrupted packet]" };
       }
     }
 
@@ -219,7 +232,8 @@ export function Chat({ session, privateKey, initialContact, isPartnerOnline, onB
       if (error) {
         toast.error("Failed to sync neural link");
       } else {
-        setMessages(data || []);
+        const decryptedMessages = await Promise.all(data.map(m => decryptMessageContent(m)));
+        setMessages(decryptedMessages);
         
         // Mark unread messages as viewed
         const unviewed = data?.filter(m => m.receiver_id === session.user.id && !m.is_viewed) || [];
@@ -244,7 +258,8 @@ export function Chat({ session, privateKey, initialContact, isPartnerOnline, onB
           filter: `receiver_id=eq.${session.user.id}`
         }, async (payload) => {
           if (payload.new.sender_id === initialContact.id) {
-            setMessages(prev => [...prev, payload.new]);
+            const decrypted = await decryptMessageContent(payload.new);
+            setMessages(prev => [...prev, decrypted]);
             
             // Mark as delivered immediately upon receipt
             await supabase.from("messages").update({ 
@@ -289,28 +304,77 @@ export function Chat({ session, privateKey, initialContact, isPartnerOnline, onB
 
     async function sendMessage(mediaType: string = "text", mediaUrl: string | null = null) {
       if (!newMessage.trim() && !mediaUrl) return;
-  
-      const messageData = {
-        sender_id: session.user.id,
-        receiver_id: initialContact.id,
-        encrypted_content: newMessage.trim() || " ", 
-        media_type: mediaType,
-        media_url: mediaUrl,
-        is_viewed: false,
-        is_delivered: partnerPresence.isOnline,
-        delivered_at: partnerPresence.isOnline ? new Date().toISOString() : null
-      };
-  
-      const { data, error } = await supabase.from("messages").insert(messageData).select();
-  
-      if (error) {
-        console.error("Transmission error:", error);
-        toast.error("Packet transmission failed: " + (error.message || "Protocol Error"));
-      } else {
-        const sentMsg = data?.[0] || messageData;
-        setMessages(prev => [...prev, sentMsg]);
-        setNewMessage("");
-        setShowOptions(false);
+
+      try {
+        toast.loading("Encrypting intelligence packet...");
+        
+        // 1. Generate AES key for this message
+        const aesKey = await generateAESKey();
+        
+        // 2. Encrypt content with AES
+        const { content: encryptedContent, iv } = await encryptWithAES(newMessage.trim() || " ", aesKey);
+        
+        // 3. Fetch recipient's public key
+        const { data: recipientProfile } = await supabase
+          .from("profiles")
+          .select("public_key")
+          .eq("id", initialContact.id)
+          .single();
+          
+        if (!recipientProfile?.public_key) {
+          throw new Error("Recipient public key not found. E2EE link cannot be established.");
+        }
+        
+        const recipientPubKey = await importPublicKey(recipientProfile.public_key);
+        
+        // 4. Fetch my public key (from profiles table)
+        const { data: myProfile } = await supabase
+          .from("profiles")
+          .select("public_key")
+          .eq("id", session.user.id)
+          .single();
+          
+        if (!myProfile?.public_key) {
+          throw new Error("Your public key not found. Please regenerate keys in settings.");
+        }
+        
+        const myPubKey = await importPublicKey(myProfile.public_key);
+        
+        // 5. Encrypt AES key for both sender and receiver
+        const senderKey = await encryptAESKeyForUser(aesKey, myPubKey);
+        const receiverKey = await encryptAESKeyForUser(aesKey, recipientPubKey);
+
+        const messageData = {
+          sender_id: session.user.id,
+          receiver_id: initialContact.id,
+          encrypted_content: encryptedContent,
+          iv: iv,
+          sender_key: senderKey,
+          receiver_key: receiverKey,
+          media_type: mediaType,
+          media_url: mediaUrl,
+          is_viewed: false,
+          is_delivered: partnerPresence.isOnline,
+          delivered_at: partnerPresence.isOnline ? new Date().toISOString() : null
+        };
+    
+        const { data, error } = await supabase.from("messages").insert(messageData).select();
+    
+        toast.dismiss();
+        if (error) {
+          console.error("Transmission error:", error);
+          toast.error("Packet transmission failed: " + (error.message || "Protocol Error"));
+        } else {
+          // Decrypt locally for immediate display
+          const sentMsg = { ...data?.[0], decrypted_content: newMessage.trim() };
+          setMessages(prev => [...prev, sentMsg]);
+          setNewMessage("");
+          setShowOptions(false);
+        }
+      } catch (err: any) {
+        toast.dismiss();
+        console.error("Encryption error:", err);
+        toast.error(err.message || "Failed to establish secure link");
       }
     }
 
@@ -551,8 +615,9 @@ export function Chat({ session, privateKey, initialContact, isPartnerOnline, onB
                           ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/10" 
                           : "bg-white/[0.03] border border-white/5 text-white/90"
                       }`}>
-                        {msg.encrypted_content}
+                        {msg.decrypted_content || (msg.media_type === 'text' ? 'Decrypting...' : '')}
                         <button 
+
                           onClick={() => deleteMessage(msg.id)}
                           className={`absolute ${isMe ? '-left-10' : '-right-10'} top-1/2 -translate-y-1/2 p-2 text-white/10 hover:text-red-500 opacity-0 group-hover/msg:opacity-100 transition-all`}
                         >
