@@ -55,7 +55,7 @@
     "atmn": "^0.0.28",
     "autumn-js": "^0.1.43",
     "bcrypt": "^5.1.1",
-    "better-auth": "1.1.10",
+    "better-auth": "^1.4.9",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -63,8 +63,7 @@
     "cobe": "^0.6.5",
     "date-fns": "^4.1.0",
     "dotted-map": "^2.2.3",
-    "drizzle-kit": "^0.30.1",
-    "drizzle-orm": "^0.38.2",
+    "drizzle-orm": "^0.41.0",
     "embla-carousel-auto-scroll": "^8.5.1",
     "embla-carousel-autoplay": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
@@ -82,9 +81,9 @@
     "otpauth": "^9.4.1",
     "qrcode": "^1.5.4",
     "qss": "^3.0.0",
-    "react": "19.0.0",
+    "react": "19.2.0",
     "react-day-picker": "9.4.4",
-    "react-dom": "19.0.0",
+    "react-dom": "19.2.0",
     "react-dropzone": "^14.3.5",
     "react-fast-marquee": "^1.6.5",
     "react-hook-form": "^7.54.1",
@@ -117,6 +116,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/three": "^0.171.0",
     "autoprefixer": "10.4.20",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "8.4.49",
@@ -125,3 +125,4 @@
     "typescript": "^5"
   }
 }
+
