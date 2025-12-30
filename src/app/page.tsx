@@ -75,6 +75,10 @@ export default function Home() {
 
   async function handleKeySetup() {
     try {
+      if (typeof window === "undefined" || !window.crypto || !window.crypto.subtle) {
+        throw new Error("Web Crypto API is not available. This is required for end-to-end encryption. Please use a modern browser and ensure you are accessing via HTTPS or localhost.");
+      }
+
       const storedPrivKey = localStorage.getItem(`priv_key_${session.user.id}`);
       if (storedPrivKey && storedPrivKey !== "undefined" && storedPrivKey !== "null") {
         try {
@@ -311,6 +315,30 @@ export default function Home() {
                <div className="flex items-center gap-4 group">
                  <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED UPLINK</p>
                </div>
+            </div>
+          </motion.div>
+        ) : keyError ? (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-10 min-h-screen flex flex-col items-center justify-center p-8 text-center"
+          >
+            <div className="p-8 bg-red-500/10 border border-red-500/20 rounded-[2rem] backdrop-blur-3xl max-w-md">
+              <Shield className="w-12 h-12 text-red-500 mx-auto mb-6" />
+              <h2 className="text-2xl font-black italic tracking-tighter uppercase text-white mb-4">Security Error</h2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                Web Crypto API is unavailable. This is required for end-to-end encryption. 
+                Please ensure you are using a modern browser and accessing the site via 
+                <span className="text-white font-bold"> HTTPS</span> or 
+                <span className="text-white font-bold"> localhost</span>.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all"
+              >
+                Retry Connection
+              </button>
             </div>
           </motion.div>
         ) : (
