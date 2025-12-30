@@ -5,9 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { Auth } from "@/components/Auth";
 import { UserDashboardView } from "@/components/UserDashboardView";
 import { OTPVerification } from "@/components/OTPVerification";
-import { Lock, Shield, Zap, Globe, MessageSquare, Phone, MapPin, Video as VideoIcon, Terminal, Cpu, Radio, Activity, Sparkles, Fingerprint } from "lucide-react";
+import { SecurityPin } from "@/components/SecurityPin";
+import { Lock, Shield, MessageSquare, Phone, Video as VideoIcon, Activity, Fingerprint } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { generateKeyPair, exportPublicKey, exportPrivateKey, importPrivateKey } from "@/lib/crypto";
+import { generateKeyPair, exportPublicKey, exportPrivateKey, importPrivateKey, isCryptoSupported } from "@/lib/crypto";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -17,9 +18,14 @@ export default function Home() {
   const [privateKey, setPrivateKey] = useState<CryptoKey | null>(null);
   const [otpRequired, setOtpRequired] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [appPinVerified, setAppPinVerified] = useState(false);
 
   useEffect(() => {
+    const isVerified = sessionStorage.getItem("app_pin_verified") === "true";
+    setAppPinVerified(isVerified);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+
       setSession(session);
       if (session) {
         checkApprovalAndOTP(session.user.id);
@@ -139,6 +145,20 @@ export default function Home() {
       </div>
     </div>
   );
+
+  if (!appPinVerified) {
+    return (
+      <SecurityPin 
+        correctCode="162008"
+        title="App Access"
+        description="Enter security code to initialize session"
+        onSuccess={() => {
+          sessionStorage.setItem("app_pin_verified", "true");
+          setAppPinVerified(true);
+        }}
+      />
+    );
+  }
 
   if (session && isApproved === false) {
     return (
