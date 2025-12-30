@@ -140,9 +140,9 @@ export default function AdminPage() {
         password,
       });
 
-      if (error) {
-        setAuthError(error.message === "Invalid login credentials" ? "Access Denied: Invalid Authorization ID or Encryption Key." : error.message);
-      } else {
+        if (error) {
+          setAuthError(error.message === "Invalid login credentials" ? "Access Denied: Invalid Email or Password." : error.message);
+        } else {
         toast.success("Security bypass successful. Access granted.");
       }
     } catch (err: any) {
@@ -188,7 +188,7 @@ export default function AdminPage() {
         setIsSignUp(false);
       }
     } catch (err: any) {
-      setAuthError(err.message || "Protocol failure during node initialization.");
+      setAuthError(err.message || "Protocol failure during user initialization.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -308,9 +308,9 @@ export default function AdminPage() {
                   className="absolute inset-0 border-2 border-white/10 border-t-white/40 rounded-2xl md:rounded-[2rem]"
                 />
               </motion.div>
-              <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter text-white">
-                {isSignUp ? 'Register' : 'Admin'} <span className="text-indigo-500">Node</span>
-              </h1>
+                <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter text-white">
+                  {isSignUp ? 'Register' : 'Admin'} <span className="text-indigo-500">Control</span>
+                </h1>
               <div className="flex items-center justify-center gap-4">
                  <div className="h-px w-6 md:w-8 bg-white/10" />
                  <p className="text-[9px] md:text-[11px] font-bold tracking-widest text-white/30">
@@ -337,15 +337,15 @@ export default function AdminPage() {
                   <div className="absolute inset-0 bg-indigo-500/20 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
                   <div className="relative bg-white/[0.03] border border-white/10 focus-within:border-indigo-500/50 rounded-2xl md:rounded-[2rem] transition-all overflow-hidden">
                     <Mail className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
-                    <input
-                      type="email"
-                      placeholder="Authorization ID"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-transparent py-5 md:py-7 pl-12 md:pl-16 pr-5 md:pr-6 outline-none text-xs md:text-sm font-medium text-white placeholder:text-white/20 transition-all"
-                      style={{ textTransform: 'none' }}
-                      required
-                    />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-transparent py-5 md:py-7 pl-12 md:pl-16 pr-5 md:pr-6 outline-none text-xs md:text-sm font-medium text-white placeholder:text-white/20 transition-all"
+                        style={{ textTransform: 'none' }}
+                        required
+                      />
                   </div>
                 </motion.div>
 
@@ -353,15 +353,15 @@ export default function AdminPage() {
                   <div className="absolute inset-0 bg-indigo-500/20 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
                   <div className="relative bg-white/[0.03] border border-white/10 focus-within:border-indigo-500/50 rounded-2xl md:rounded-[2rem] transition-all overflow-hidden">
                     <Lock className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Encryption Key"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-transparent py-5 md:py-7 pl-12 md:pl-16 pr-12 md:pr-16 outline-none text-xs md:text-sm font-medium text-white placeholder:text-white/20 transition-all"
-                      style={{ textTransform: 'none' }}
-                      required
-                    />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-transparent py-5 md:py-7 pl-12 md:pl-16 pr-12 md:pr-16 outline-none text-xs md:text-sm font-medium text-white placeholder:text-white/20 transition-all"
+                        style={{ textTransform: 'none' }}
+                        required
+                      />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
@@ -427,7 +427,7 @@ export default function AdminPage() {
                       <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />
                     ) : (
                       <>
-                          {isSignUp ? 'Create Node' : 'Please Enter'}
+                          {isSignUp ? 'Create Account' : 'Please Enter'}
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform" />
                       </>
                     )}
@@ -440,7 +440,7 @@ export default function AdminPage() {
                     onClick={() => setIsSignUp(!isSignUp)}
                     className="w-full text-[9px] md:text-[10px] font-bold tracking-widest text-white/20 hover:text-white transition-colors py-2"
                   >
-                  {isSignUp ? 'Back to Login' : 'Register New Node'}
+                    {isSignUp ? 'Back to Login' : 'Register New User'}
                 </button>
               </div>
             </form>

@@ -75,10 +75,6 @@ export default function Home() {
 
   async function handleKeySetup() {
     try {
-      if (typeof window === "undefined" || !window.crypto || !window.crypto.subtle) {
-        throw new Error("Web Crypto API is not available. This is required for end-to-end encryption. Please use a modern browser and ensure you are accessing via HTTPS or localhost.");
-      }
-
       const storedPrivKey = localStorage.getItem(`priv_key_${session.user.id}`);
       if (storedPrivKey && storedPrivKey !== "undefined" && storedPrivKey !== "null") {
         try {
@@ -226,10 +222,10 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Orchids <span className="text-indigo-400">v2</span></h1>
+                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Chatify <span className="text-indigo-400">Pro</span></h1>
                     <div className="flex items-center gap-2 mt-1">
                         <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[8px] font-medium uppercase tracking-[0.4em] text-white/40">Secure Node</span>
+                        <span className="text-[8px] font-medium uppercase tracking-[0.4em] text-white/40">Secure Connection</span>
                     </div>
                   </div>
                 </div>
@@ -313,32 +309,8 @@ export default function Home() {
                </div>
                <div className="w-px h-8 bg-white/10" />
                <div className="flex items-center gap-4 group">
-                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED UPLINK</p>
+                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED CONNECTION</p>
                </div>
-            </div>
-          </motion.div>
-        ) : keyError ? (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="relative z-10 min-h-screen flex flex-col items-center justify-center p-8 text-center"
-          >
-            <div className="p-8 bg-red-500/10 border border-red-500/20 rounded-[2rem] backdrop-blur-3xl max-w-md">
-              <Shield className="w-12 h-12 text-red-500 mx-auto mb-6" />
-              <h2 className="text-2xl font-black italic tracking-tighter uppercase text-white mb-4">Security Error</h2>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-                Web Crypto API is unavailable. This is required for end-to-end encryption. 
-                Please ensure you are using a modern browser and accessing the site via 
-                <span className="text-white font-bold"> HTTPS</span> or 
-                <span className="text-white font-bold"> localhost</span>.
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all"
-              >
-                Retry Connection
-              </button>
             </div>
           </motion.div>
         ) : (
