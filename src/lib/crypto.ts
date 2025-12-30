@@ -1,3 +1,7 @@
+export function isCryptoSupported(): boolean {
+  return typeof window !== "undefined" && window.crypto && window.crypto.subtle !== undefined;
+}
+
 export async function generateKeyPair() {
   const keyPair = await window.crypto.subtle.generateKey(
     {
