@@ -1,14 +1,5 @@
-
-function getCrypto() {
-  if (typeof window === "undefined" || !window.crypto || !window.crypto.subtle) {
-    throw new Error("Web Crypto API is not available. This is required for end-to-end encryption. Please use a modern browser and ensure you are accessing via HTTPS or localhost.");
-  }
-  return window.crypto.subtle;
-}
-
 export async function generateKeyPair() {
-  const crypto = getCrypto();
-  const keyPair = await crypto.generateKey(
+  const keyPair = await window.crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
       modulusLength: 4096,
@@ -22,19 +13,17 @@ export async function generateKeyPair() {
 }
 
 export async function exportPublicKey(key: CryptoKey) {
-  const crypto = getCrypto();
-  const exported = await crypto.exportKey("spki", key);
+  const exported = await window.crypto.subtle.exportKey("spki", key);
   return btoa(String.fromCharCode(...new Uint8Array(exported)));
 }
 
 export async function importPublicKey(pem: string) {
-  const crypto = getCrypto();
   const binaryDerString = window.atob(pem);
   const binaryDer = new Uint8Array(binaryDerString.length);
   for (let i = 0; i < binaryDerString.length; i++) {
     binaryDer[i] = binaryDerString.charCodeAt(i);
   }
-  return await crypto.importKey(
+  return await window.crypto.subtle.importKey(
     "spki",
     binaryDer.buffer,
     {
@@ -47,19 +36,17 @@ export async function importPublicKey(pem: string) {
 }
 
 export async function exportPrivateKey(key: CryptoKey) {
-  const crypto = getCrypto();
-  const exported = await crypto.exportKey("pkcs8", key);
+  const exported = await window.crypto.subtle.exportKey("pkcs8", key);
   return btoa(String.fromCharCode(...new Uint8Array(exported)));
 }
 
 export async function importPrivateKey(pem: string) {
-  const crypto = getCrypto();
   const binaryDerString = window.atob(pem);
   const binaryDer = new Uint8Array(binaryDerString.length);
   for (let i = 0; i < binaryDerString.length; i++) {
     binaryDer[i] = binaryDerString.charCodeAt(i);
   }
-  return await crypto.importKey(
+  return await window.crypto.subtle.importKey(
     "pkcs8",
     binaryDer.buffer,
     {
@@ -72,10 +59,9 @@ export async function importPrivateKey(pem: string) {
 }
 
 export async function encryptMessage(message: string, publicKey: CryptoKey) {
-  const crypto = getCrypto();
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
-  const encrypted = await crypto.encrypt(
+  const encrypted = await window.crypto.subtle.encrypt(
     {
       name: "RSA-OAEP",
     },
@@ -86,13 +72,12 @@ export async function encryptMessage(message: string, publicKey: CryptoKey) {
 }
 
 export async function decryptMessage(encryptedBase64: string, privateKey: CryptoKey) {
-  const crypto = getCrypto();
   const binaryString = window.atob(encryptedBase64);
   const data = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     data[i] = binaryString.charCodeAt(i);
   }
-  const decrypted = await crypto.decrypt(
+  const decrypted = await window.crypto.subtle.decrypt(
     {
       name: "RSA-OAEP",
     },
@@ -104,8 +89,7 @@ export async function decryptMessage(encryptedBase64: string, privateKey: Crypto
 }
 
 export async function generateAESKey() {
-  const crypto = getCrypto();
-  return await crypto.generateKey(
+  return await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
     true,
     ["encrypt", "decrypt"]
@@ -113,19 +97,17 @@ export async function generateAESKey() {
 }
 
 export async function exportKey(key: CryptoKey) {
-  const crypto = getCrypto();
-  const exported = await crypto.exportKey("raw", key);
+  const exported = await window.crypto.subtle.exportKey("raw", key);
   return btoa(String.fromCharCode(...new Uint8Array(exported)));
 }
 
 export async function importAESKey(base64: string) {
-  const crypto = getCrypto();
   const binaryString = window.atob(base64);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  return await crypto.importKey(
+  return await window.crypto.subtle.importKey(
     "raw",
     bytes.buffer,
     "AES-GCM",
@@ -135,10 +117,9 @@ export async function importAESKey(base64: string) {
 }
 
 export async function encryptWithAES(text: string, key: CryptoKey) {
-  const crypto = getCrypto();
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
   const encoder = new TextEncoder();
-  const encrypted = await crypto.encrypt(
+  const encrypted = await window.crypto.subtle.encrypt(
     { name: "AES-GCM", iv, tagLength: 128 },
     key,
     encoder.encode(text)
@@ -150,7 +131,6 @@ export async function encryptWithAES(text: string, key: CryptoKey) {
 }
 
 export async function decryptWithAES(encryptedBase64: string, ivBase64: string, key: CryptoKey) {
-  const crypto = getCrypto();
   const encryptedBinary = window.atob(encryptedBase64);
   const encryptedBytes = new Uint8Array(encryptedBinary.length);
   for (let i = 0; i < encryptedBinary.length; i++) {
@@ -163,7 +143,7 @@ export async function decryptWithAES(encryptedBase64: string, ivBase64: string, 
     ivBytes[i] = ivBinary.charCodeAt(i);
   }
 
-  const decrypted = await crypto.decrypt(
+  const decrypted = await window.crypto.subtle.decrypt(
     { name: "AES-GCM", iv: ivBytes, tagLength: 128 },
     key,
     encryptedBytes
@@ -172,9 +152,8 @@ export async function decryptWithAES(encryptedBase64: string, ivBase64: string, 
 }
 
 export async function encryptAESKeyForUser(aesKey: CryptoKey, userPublicKey: CryptoKey) {
-  const crypto = getCrypto();
-  const exported = await crypto.exportKey("raw", aesKey);
-  const encrypted = await crypto.encrypt(
+  const exported = await window.crypto.subtle.exportKey("raw", aesKey);
+  const encrypted = await window.crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
     userPublicKey,
     exported
@@ -183,18 +162,17 @@ export async function encryptAESKeyForUser(aesKey: CryptoKey, userPublicKey: Cry
 }
 
 export async function decryptAESKeyWithUserPrivateKey(encryptedAESKeyBase64: string, userPrivateKey: CryptoKey) {
-  const crypto = getCrypto();
   const binaryString = window.atob(encryptedAESKeyBase64);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  const decrypted = await crypto.decrypt(
+  const decrypted = await window.crypto.subtle.decrypt(
     { name: "RSA-OAEP" },
     userPrivateKey,
     bytes
   );
-  return await crypto.importKey(
+  return await window.crypto.subtle.importKey(
     "raw",
     decrypted,
     "AES-GCM",
@@ -210,17 +188,15 @@ export function generateSecureToken(length: number = 32): string {
 }
 
 export async function hashData(data: string): Promise<string> {
-  const crypto = getCrypto();
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.digest('SHA-512', dataBuffer);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-512', dataBuffer);
   return btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
 }
 
 export async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
-  const crypto = getCrypto();
   const encoder = new TextEncoder();
-  const keyMaterial = await crypto.importKey(
+  const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
     "PBKDF2",
@@ -228,7 +204,7 @@ export async function deriveKey(password: string, salt: Uint8Array): Promise<Cry
     ["deriveBits", "deriveKey"]
   );
   
-  return await crypto.deriveKey(
+  return await window.crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
       salt: salt as any,

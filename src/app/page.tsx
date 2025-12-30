@@ -222,10 +222,10 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Chatify <span className="text-indigo-400">Pro</span></h1>
+                    <h1 className="text-xl font-black italic tracking-tighter uppercase text-white leading-none">Orchids <span className="text-indigo-400">v2</span></h1>
                     <div className="flex items-center gap-2 mt-1">
                         <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[8px] font-medium uppercase tracking-[0.4em] text-white/40">Secure Connection</span>
+                        <span className="text-[8px] font-medium uppercase tracking-[0.4em] text-white/40">Secure Node</span>
                     </div>
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default function Home() {
                </div>
                <div className="w-px h-8 bg-white/10" />
                <div className="flex items-center gap-4 group">
-                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED CONNECTION</p>
+                 <p className="text-[9px] font-medium uppercase tracking-[0.6em]">ENCRYPTED UPLINK</p>
                </div>
             </div>
           </motion.div>

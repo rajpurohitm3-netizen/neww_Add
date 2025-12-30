@@ -39,7 +39,7 @@ export function OTPVerification({ userId, userEmail, onVerified, onSkip, isSetup
       algorithm: "SHA1",
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.fromHex(window.crypto.getRandomValues(new Uint8Array(20)).reduce((s, b) => s + b.toString(16).padStart(2, '0'), ''))
+      secret: OTPAuth.Secret.fromHex(crypto.getRandomValues(new Uint8Array(20)).reduce((s, b) => s + b.toString(16).padStart(2, '0'), ''))
     });
 
     const secretBase32 = totp.secret.base32;

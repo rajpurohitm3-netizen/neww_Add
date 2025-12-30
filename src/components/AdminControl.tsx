@@ -16,14 +16,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 
 const TABS = [
-  { id: "overview", label: "Overview", icon: Activity },
-  { id: "stories", label: "Stories", icon: Radio },
-  { id: "requests", label: "User Approvals", icon: UserPlus },
+  { id: "overview", label: "Intelligence Hub", icon: Activity },
+  { id: "stories", label: "Network Stories", icon: Radio },
+  { id: "requests", label: "Access Requests", icon: UserPlus },
   { id: "password", label: "Password Requests", icon: Lock },
-  { id: "users", label: "User Directory", icon: Users },
-  { id: "security", label: "Security & Keys", icon: Lock },
-  { id: "content", label: "Data Management", icon: MessageSquare },
-  { id: "system", label: "System Config", icon: Settings2 },
+  { id: "users", label: "Node Directory", icon: Users },
+  { id: "security", label: "Firewall & Keys", icon: Lock },
+  { id: "content", label: "Data Integrity", icon: MessageSquare },
+  { id: "system", label: "Kernel Config", icon: Settings2 },
 ];
 
 function StoriesManagement() {

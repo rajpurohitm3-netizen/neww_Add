@@ -232,7 +232,7 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
         fetchRecentChats();
         fetchUnreadCount();
         toast.info("New message received");
-        showNotification("New Message", { body: "You have a new message." });
+        showNotification("New Message", { body: "You have received a new intelligence packet." });
       }).subscribe();
 
       const callsChannel = supabase.channel("incoming-calls").on("postgres_changes", { event: "INSERT", schema: "public", table: "calls", filter: `receiver_id=eq.${session.user.id}` }, async (payload) => {
@@ -252,7 +252,7 @@ export function UserDashboardView({ session, privateKey }: UserDashboardViewProp
           const { data: creator } = await supabase.from("profiles").select("username").eq("id", payload.new.user_id).single();
           if (creator) {
             toast.info(`New story from ${creator.username}`, { icon: <Camera className="w-4 h-4 text-pink-500" /> });
-            showNotification("New Story", { body: `${creator.username} shared a new story.` });
+            showNotification("New Story", { body: `${creator.username} shared a new temporal snapshot.` });
           }
         }
       }).subscribe();
